@@ -1623,6 +1623,8 @@ pub enum JoinConstraint {
 #[cfg_attr(feature = "visitor", derive(Visit, VisitMut))]
 pub struct OrderByExpr {
     pub expr: Expr,
+    /// Optional opclass
+    pub opclass: Option<Vec<Ident>>,
     /// Optional `ASC` or `DESC`
     pub asc: Option<bool>,
     /// Optional `NULLS FIRST` or `NULLS LAST`
@@ -1632,6 +1634,17 @@ pub struct OrderByExpr {
 impl fmt::Display for OrderByExpr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.expr)?;
+        match &self.opclass {
+            Some(opclass_parts) => {
+                let opclass = opclass_parts
+                    .iter()
+                    .map(|part| part.to_string())
+                    .collect::<Vec<_>>()
+                    .join(".");
+                write!(f, " {opclass}")?
+            }
+            None => (),
+        }
         match self.asc {
             Some(true) => write!(f, " ASC")?,
             Some(false) => write!(f, " DESC")?,

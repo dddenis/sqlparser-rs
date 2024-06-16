@@ -7447,6 +7447,37 @@ impl<'a> Parser<'a> {
         Ok(idents)
     }
 
+    pub fn maybe_parse_multipart_identifier(&mut self) -> Option<Vec<Ident>> {
+        let mut idents = vec![];
+
+        // expecting at least one word for identifier
+        match self.peek_token().token {
+            Token::Word(w) => {
+                idents.push(w.to_ident());
+                self.next_token();
+            }
+            _ => return None,
+        };
+
+        // parse optional next parts if exist
+        loop {
+            match self.peek_token().token {
+                // ensure that optional period is succeeded by another identifier
+                Token::Period => match self.peek_nth_token(1).token {
+                    Token::Word(w) => {
+                        idents.push(w.to_ident());
+                        self.next_token();
+                        self.next_token();
+                    }
+                    _ => return None,
+                },
+                _ => break,
+            }
+        }
+
+        Some(idents)
+    }
+
     /// Parse a simple one-word identifier (possibly quoted, possibly a keyword)
     ///
     /// The `in_table_clause` parameter indicates whether the identifier is a table in a FROM, JOIN, or
@@ -10392,6 +10423,13 @@ impl<'a> Parser<'a> {
     pub fn parse_order_by_expr(&mut self) -> Result<OrderByExpr, ParserError> {
         let expr = self.parse_expr()?;
 
+        let opclass = match self.peek_token().token {
+            Token::Word(w) if w.keyword == Keyword::NoKeyword => {
+                self.maybe_parse_multipart_identifier()
+            }
+            _ => None,
+        };
+
         let asc = if self.parse_keyword(Keyword::ASC) {
             Some(true)
         } else if self.parse_keyword(Keyword::DESC) {
@@ -10410,6 +10448,7 @@ impl<'a> Parser<'a> {
 
         Ok(OrderByExpr {
             expr,
+            opclass,
             asc,
             nulls_first,
         })

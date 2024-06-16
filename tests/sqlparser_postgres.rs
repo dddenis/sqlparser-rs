@@ -2363,6 +2363,38 @@ fn parse_create_index_with_nulls_distinct() {
 }
 
 #[test]
+fn parse_create_index_with_opclass() {
+    let sql = "CREATE INDEX my_index ON my_table USING hnsw (col1 vector_l2_ops,col2 public.vector_l2_ops)";
+    match pg().verified_stmt(sql) {
+        Statement::CreateIndex(CreateIndex {
+            name: Some(ObjectName(name)),
+            table_name: ObjectName(table_name),
+            using,
+            columns,
+            unique,
+            concurrently,
+            if_not_exists,
+            nulls_distinct: None,
+            include,
+            predicate: None,
+        }) => {
+            assert_eq_vec(&["my_index"], &name);
+            assert_eq_vec(&["my_table"], &table_name);
+            assert_eq!(Some(Ident::from("hnsw")), using);
+            assert!(!unique);
+            assert!(!concurrently);
+            assert!(!if_not_exists);
+            assert_eq_vec(
+                &["col1 vector_l2_ops", "col2 public.vector_l2_ops"],
+                &columns,
+            );
+            assert!(include.is_empty());
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
 fn parse_array_subquery_expr() {
     let sql = "SELECT ARRAY(SELECT 1 UNION SELECT 2)";
     let select = pg().verified_only_select(sql);

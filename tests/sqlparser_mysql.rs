@@ -1881,6 +1881,7 @@ fn parse_delete_with_order_by() {
                         value: "id".to_owned(),
                         quote_style: None
                     }),
+                    opclass: None,
                     asc: Some(false),
                     nulls_first: None,
                 }],

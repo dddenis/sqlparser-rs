@@ -2046,16 +2046,19 @@ fn parse_select_order_by() {
             vec![
                 OrderByExpr {
                     expr: Expr::Identifier(Ident::new("lname")),
+                    opclass: None,
                     asc: Some(true),
                     nulls_first: None,
                 },
                 OrderByExpr {
                     expr: Expr::Identifier(Ident::new("fname")),
+                    opclass: None,
                     asc: Some(false),
                     nulls_first: None,
                 },
                 OrderByExpr {
                     expr: Expr::Identifier(Ident::new("id")),
+                    opclass: None,
                     asc: None,
                     nulls_first: None,
                 },
@@ -2078,11 +2081,13 @@ fn parse_select_order_by_limit() {
         vec![
             OrderByExpr {
                 expr: Expr::Identifier(Ident::new("lname")),
+                opclass: None,
                 asc: Some(true),
                 nulls_first: None,
             },
             OrderByExpr {
                 expr: Expr::Identifier(Ident::new("fname")),
+                opclass: None,
                 asc: Some(false),
                 nulls_first: None,
             },
@@ -2101,11 +2106,13 @@ fn parse_select_order_by_nulls_order() {
         vec![
             OrderByExpr {
                 expr: Expr::Identifier(Ident::new("lname")),
+                opclass: None,
                 asc: Some(true),
                 nulls_first: Some(true),
             },
             OrderByExpr {
                 expr: Expr::Identifier(Ident::new("fname")),
+                opclass: None,
                 asc: Some(false),
                 nulls_first: Some(false),
             },
@@ -2200,6 +2207,7 @@ fn parse_select_qualify() {
                     partition_by: vec![Expr::Identifier(Ident::new("p"))],
                     order_by: vec![OrderByExpr {
                         expr: Expr::Identifier(Ident::new("o")),
+                        opclass: None,
                         asc: None,
                         nulls_first: None,
                     }],
@@ -2560,6 +2568,7 @@ fn parse_listagg() {
                         value: "id".to_string(),
                         quote_style: None,
                     }),
+                    opclass: None,
                     asc: None,
                     nulls_first: None,
                 },
@@ -2568,6 +2577,7 @@ fn parse_listagg() {
                         value: "username".to_string(),
                         quote_style: None,
                     }),
+                    opclass: None,
                     asc: None,
                     nulls_first: None,
                 },
@@ -4361,6 +4371,7 @@ fn parse_window_functions() {
                 partition_by: vec![],
                 order_by: vec![OrderByExpr {
                     expr: Expr::Identifier(Ident::new("dt")),
+                    opclass: None,
                     asc: Some(false),
                     nulls_first: None,
                 }],
@@ -4568,6 +4579,7 @@ fn test_parse_named_window() {
                             value: "C12".to_string(),
                             quote_style: None,
                         }),
+                        opclass: None,
                         asc: None,
                         nulls_first: None,
                     }],
@@ -7252,11 +7264,13 @@ fn parse_create_index() {
     let indexed_columns = vec![
         OrderByExpr {
             expr: Expr::Identifier(Ident::new("name")),
+            opclass: None,
             asc: None,
             nulls_first: None,
         },
         OrderByExpr {
             expr: Expr::Identifier(Ident::new("age")),
+            opclass: None,
             asc: Some(false),
             nulls_first: None,
         },
@@ -7286,11 +7300,13 @@ fn test_create_index_with_using_function() {
     let indexed_columns = vec![
         OrderByExpr {
             expr: Expr::Identifier(Ident::new("name")),
+            opclass: None,
             asc: None,
             nulls_first: None,
         },
         OrderByExpr {
             expr: Expr::Identifier(Ident::new("age")),
+            opclass: None,
             asc: Some(false),
             nulls_first: None,
         },
@@ -9545,6 +9561,7 @@ fn test_match_recognize() {
             partition_by: vec![Expr::Identifier(Ident::new("company"))],
             order_by: vec![OrderByExpr {
                 expr: Expr::Identifier(Ident::new("price_date")),
+                opclass: None,
                 asc: None,
                 nulls_first: None,
             }],
