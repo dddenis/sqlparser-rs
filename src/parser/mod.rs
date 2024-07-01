@@ -6141,6 +6141,25 @@ impl<'a> Parser<'a> {
         Ok(Partition { partitions })
     }
 
+    pub fn parse_storage_value(&mut self) -> Result<StorageValue, ParserError> {
+        if self.parse_keyword(Keyword::PLAIN) {
+            Ok(StorageValue::Plain)
+        } else if self.parse_keyword(Keyword::EXTERNAL) {
+            Ok(StorageValue::External)
+        } else if self.parse_keyword(Keyword::EXTENDED) {
+            Ok(StorageValue::Extended)
+        } else if self.parse_keyword(Keyword::MAIN) {
+            Ok(StorageValue::Main)
+        } else if self.parse_keyword(Keyword::DEFAULT) {
+            Ok(StorageValue::Default)
+        } else {
+            self.expected(
+                "one of PLAIN, EXTERNAL, EXTENDED, MAIN or DEFAULT",
+                self.peek_token(),
+            )
+        }
+    }
+
     pub fn parse_alter_table_operation(&mut self) -> Result<AlterTableOperation, ParserError> {
         let operation = if self.parse_keyword(Keyword::ADD) {
             if let Some(constraint) = self.parse_optional_table_constraint()? {
@@ -6387,9 +6406,12 @@ impl<'a> Parser<'a> {
                     generated_as,
                     sequence_options,
                 }
+            } else if self.parse_keywords(&[Keyword::SET, Keyword::STORAGE]) {
+                let value = self.parse_storage_value()?;
+                AlterColumnOperation::SetStorage { value }
             } else {
                 let message = if is_postgresql {
-                    "SET/DROP NOT NULL, SET DEFAULT, SET DATA TYPE, or ADD GENERATED after ALTER COLUMN"
+                    "SET/DROP NOT NULL, SET DEFAULT, SET DATA TYPE, ADD GENERATED or SET STORAGE after ALTER COLUMN"
                 } else {
                     "SET/DROP NOT NULL, SET DEFAULT, or SET DATA TYPE after ALTER COLUMN"
                 };

@@ -369,6 +369,10 @@ pub enum AlterColumnOperation {
         generated_as: Option<GeneratedAs>,
         sequence_options: Option<Vec<SequenceOptions>>,
     },
+    /// `SET STORAGE { PLAIN | EXTERNAL | EXTENDED | MAIN | DEFAULT }`
+    ///
+    /// Note: this is a PostgreSQL-specific operation?
+    SetStorage { value: StorageValue },
 }
 
 impl fmt::Display for AlterColumnOperation {
@@ -410,6 +414,9 @@ impl fmt::Display for AlterColumnOperation {
                     write!(f, " )")?;
                 }
                 Ok(())
+            }
+            AlterColumnOperation::SetStorage { value } => {
+                write!(f, "SET STORAGE {value}")
             }
         }
     }
@@ -1261,5 +1268,29 @@ impl fmt::Display for Partition {
             "PARTITION ({})",
             display_comma_separated(&self.partitions)
         )
+    }
+}
+
+/// ALTER COLUMN ... SET STORAGE {value}
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "visitor", derive(Visit, VisitMut))]
+pub enum StorageValue {
+    Plain,
+    External,
+    Extended,
+    Main,
+    Default,
+}
+
+impl fmt::Display for StorageValue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(match self {
+            StorageValue::Plain => "PLAIN",
+            StorageValue::External => "EXTERNAL",
+            StorageValue::Extended => "EXTENDED",
+            StorageValue::Main => "MAIN",
+            StorageValue::Default => "DEFAULT",
+        })
     }
 }

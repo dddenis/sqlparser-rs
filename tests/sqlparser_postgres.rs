@@ -669,6 +669,24 @@ fn parse_alter_table_alter_column_add_generated() {
 }
 
 #[test]
+fn parse_alter_table_alter_column_set_storage() {
+    match alter_table_op(
+        pg().verified_stmt("ALTER TABLE tab ALTER COLUMN col SET STORAGE EXTENDED"),
+    ) {
+        AlterTableOperation::AlterColumn { column_name, op } => {
+            assert_eq!("col", column_name.to_string());
+            assert_eq!(
+                op,
+                AlterColumnOperation::SetStorage {
+                    value: StorageValue::Extended
+                }
+            );
+        }
+        _ => unreachable!(),
+    }
+}
+
+#[test]
 fn parse_alter_table_add_columns() {
     match pg().verified_stmt("ALTER TABLE IF EXISTS ONLY tab ADD COLUMN a TEXT, ADD COLUMN b INT") {
         Statement::AlterTable {
